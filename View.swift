@@ -1,8 +1,19 @@
 import ScreenSaver
 
 class Matrix: ScreenSaverView {
-  var j: Int = 0
-  let font = NSFont(name: "Monaco", size: 44) ?? NSFont.monospacedSystemFont(ofSize: 14, weight: .medium)
+  let font = NSFont(name: "Monaco", size: 14) ?? NSFont.monospacedSystemFont(ofSize: 14, weight: .medium)
+  
+  var columns: Int {
+    return Int(frame.width / font.pointSize)
+  }
+  
+  var rows: Int {
+    return Int(frame.height / font.pointSize)
+  }
+  
+  var rect: NSRect {
+    return NSRect(origin: .zero, size: NSSize(width: self.font.pointSize, height: frame.height))
+  }
   
   required init?(coder: NSCoder) {
     super.init(coder: coder)
@@ -17,14 +28,15 @@ class Matrix: ScreenSaverView {
     needsDisplay = true
   }
   
+  var i = 0
   override func draw(_ rect: NSRect) {
-    NSAttributedString(string: "\(self.j)",
+    NSAttributedString(string: Array(repeating: "0", count: i).joined(separator: "\n"),
       attributes: [
         .backgroundColor: NSColor.red,
         .foregroundColor: NSColor.green,
         .font: self.font,
-    ]).draw(at: NSPoint(x: 0, y: self.j * Int(self.font.pointSize)))
-    self.j += 1
+    ]).draw(in: self.rect)
+    i+=1
   }
   
   override var isFlipped: Bool {
