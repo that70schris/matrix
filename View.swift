@@ -1,42 +1,32 @@
 import ScreenSaver
 
+let font = NSFont(name: "Monaco", size: 14) ?? NSFont.monospacedSystemFont(ofSize: 14, weight: .medium)
+
 class Matrix: ScreenSaverView {
-  let font = NSFont(name: "Monaco", size: 14) ?? NSFont.monospacedSystemFont(ofSize: 14, weight: .medium)
-  
-  var columns: Int {
-    return Int(frame.width / font.pointSize)
-  }
-  
-  var rows: Int {
-    return Int(frame.height / font.pointSize)
-  }
-  
-  var rect: NSRect {
-    return NSRect(origin: .zero, size: NSSize(width: self.font.pointSize, height: frame.height))
-  }
-  
   required init?(coder: NSCoder) {
     super.init(coder: coder)
   }
   
+  var lanes: Array<Lane> = []
   override init?(frame: NSRect, isPreview: Bool) {
     super.init(frame: frame, isPreview: isPreview)
     animationTimeInterval = 1
+    
+    let width = font.pointSize * (3/4)
+    for i in 0...(Int(frame.width / width)) {
+      lanes.append(Lane(NSRect(origin: NSPoint(x: CGFloat(i) * width, y: 0), size: frame.size)))
+    }
+    
   }
   
   override func animateOneFrame() {
     needsDisplay = true
   }
   
-  var i = 0
   override func draw(_ rect: NSRect) {
-    NSAttributedString(string: Array(repeating: "0", count: i).joined(separator: "\n"),
-      attributes: [
-        .backgroundColor: NSColor.red,
-        .foregroundColor: NSColor.green,
-        .font: self.font,
-    ]).draw(in: self.rect)
-    i+=1
+    lanes.forEach({ lane in
+      lane.draw()
+    })
   }
   
   override var isFlipped: Bool {
@@ -47,3 +37,37 @@ class Matrix: ScreenSaverView {
     return true
   }
 }
+
+class Lane {
+  var chars: [NSMutableAttributedString] = []
+  var i = 0
+  
+  var frame: NSRect
+  init(_ frame: NSRect) {
+    self.frame = frame
+    chars = Array(repeating:
+      NSMutableAttributedString(
+        string: "",
+        attributes: [
+          .backgroundColor: NSColor.red,
+          .foregroundColor: NSColor.green,
+          .font: font,
+        ]
+      ),
+      count: Int(frame.height / font.pointSize)
+    )
+  }
+  
+  func draw() {
+    self.chars[i].mutableString.setString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".randomElement()!.description)
+    
+    i = chars.count - min(i + 1, chars.count - 1)
+    var j: Int = 0
+    self.chars.forEach({ char in
+      char.draw(at: NSPoint(x: frame.minX, y: CGFloat(j) * font.pointSize))
+      j+=1
+    })
+  }
+}
+
+
