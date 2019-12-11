@@ -56,13 +56,10 @@ class Lane {
         ]
       ))
     }
-    
   }
   
   func draw() {
-    print(chars)
     guard chars.count > i else { return }
-    print(chars)
     var j: Int = 0
     
     self.chars[i].mutableString.setString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".randomElement()!.description)
@@ -71,7 +68,7 @@ class Lane {
       j+=1
     })
     
-    i = chars.count - min(i + 1, chars.count - 1)
+    i = i + 1 % chars.count
   }
 }
 
