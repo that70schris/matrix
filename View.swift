@@ -45,28 +45,33 @@ class Lane {
   var frame: NSRect
   init(_ frame: NSRect) {
     self.frame = frame
-    chars = Array(repeating:
-      NSMutableAttributedString(
-        string: "",
+    
+    for _ in 0...(Int(frame.height / font.pointSize)) {
+      chars.append(NSMutableAttributedString(
+        string: " ",
         attributes: [
           .backgroundColor: NSColor.red,
           .foregroundColor: NSColor.green,
           .font: font,
         ]
-      ),
-      count: Int(frame.height / font.pointSize)
-    )
+      ))
+    }
+    
   }
   
   func draw() {
-    self.chars[i].mutableString.setString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".randomElement()!.description)
-    
-    i = chars.count - min(i + 1, chars.count - 1)
+    print(chars)
+    guard chars.count > i else { return }
+    print(chars)
     var j: Int = 0
+    
+    self.chars[i].mutableString.setString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".randomElement()!.description)
     self.chars.forEach({ char in
       char.draw(at: NSPoint(x: frame.minX, y: CGFloat(j) * font.pointSize))
       j+=1
     })
+    
+    i = chars.count - min(i + 1, chars.count - 1)
   }
 }
 
