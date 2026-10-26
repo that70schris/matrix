@@ -15,22 +15,30 @@ private struct RainColumn {
     var phase: CGFloat
 }
 
+private enum MatrixMotion {
+    static let speedRange: ClosedRange<CGFloat> = 5...15
+    static let lengthRange: ClosedRange<Int> = 10...40
+}
+
 final class MatrixScreenSaverView: ScreenSaverView {
     private let glyphs = Array("日ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶﾑﾗｾﾈｽﾀﾇ012345789:・.=*+-<>|")
     private var columns: [RainColumn] = []
     private var lastTick: TimeInterval = 0
-    private var font = NSFont.monospacedSystemFont(ofSize: 23, weight: .regular)
-    private var cellWidth: CGFloat = 20
-    private var cellHeight: CGFloat = 27
+    private var font = NSFont.monospacedSystemFont(ofSize: 16, weight: .regular)
+    private var cellWidth: CGFloat = 14
+    private var cellHeight: CGFloat = 19
 
     override init?(frame: NSRect, isPreview: Bool) {
         super.init(frame: frame, isPreview: isPreview)
-        animationTimeInterval = 1.0 / 120.0
-        rebuildColumns()
+        configureAnimation()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        configureAnimation()
+    }
+
+    private func configureAnimation() {
         animationTimeInterval = 1.0 / 120.0
         rebuildColumns()
     }
@@ -49,8 +57,8 @@ final class MatrixScreenSaverView: ScreenSaverView {
             let rows = Int(bounds.height / cellHeight)
             return RainColumn(
                 head: CGFloat(Int.random(in: -rows...rows)),
-                speed: CGFloat.random(in: 5.0...15.0),
-                length: Int.random(in: 8...28),
+                speed: CGFloat.random(in: MatrixMotion.speedRange),
+                length: Int.random(in: MatrixMotion.lengthRange),
                 glyphs: (0..<(rows + 32)).map { _ in String(glyphs.randomElement()!) },
                 phase: CGFloat.random(in: 0...1)
             )
@@ -66,8 +74,8 @@ final class MatrixScreenSaverView: ScreenSaverView {
             columns[index].head += columns[index].speed * CGFloat(delta)
             if columns[index].head - CGFloat(columns[index].length) > rows {
                 columns[index].head = CGFloat.random(in: -CGFloat(columns[index].length)...(-2))
-                columns[index].speed = CGFloat.random(in: 5.0...15.0)
-                columns[index].length = Int.random(in: 8...28)
+                columns[index].speed = CGFloat.random(in: MatrixMotion.speedRange)
+                columns[index].length = Int.random(in: MatrixMotion.lengthRange)
                 columns[index].phase = CGFloat.random(in: 0...1)
             }
             if Int.random(in: 0...18) == 0, !columns[index].glyphs.isEmpty {
