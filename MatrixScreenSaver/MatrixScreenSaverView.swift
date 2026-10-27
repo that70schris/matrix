@@ -12,6 +12,7 @@ private struct RainColumn {
     var speed: CGFloat
     var length: Int
     var glyphs: [String]
+    var brightness: [CGFloat]
     var phase: CGFloat
 }
 
@@ -60,6 +61,7 @@ final class MatrixScreenSaverView: ScreenSaverView {
                 speed: CGFloat.random(in: MatrixMotion.speedRange),
                 length: Int.random(in: MatrixMotion.lengthRange),
                 glyphs: (0..<(rows + 32)).map { _ in String(glyphs.randomElement()!) },
+                brightness: Array(repeating: 0, count: rows + 32),
                 phase: CGFloat.random(in: 0...1)
             )
         }
@@ -71,7 +73,15 @@ final class MatrixScreenSaverView: ScreenSaverView {
         lastTick = now
         let rows = CGFloat(bounds.height / cellHeight)
         for index in columns.indices {
+            let decay = CGFloat(exp(-delta / 0.9))
+            for row in columns[index].brightness.indices {
+                columns[index].brightness[row] *= decay
+            }
             columns[index].head += columns[index].speed * CGFloat(delta)
+            let headRow = Int(columns[index].head)
+            if columns[index].brightness.indices.contains(headRow) {
+                columns[index].brightness[headRow] = 1
+            }
             if columns[index].head - CGFloat(columns[index].length) > rows {
                 columns[index].head = CGFloat.random(in: -CGFloat(columns[index].length)...(-2))
                 columns[index].speed = CGFloat.random(in: MatrixMotion.speedRange)
@@ -98,9 +108,10 @@ final class MatrixScreenSaverView: ScreenSaverView {
             guard firstRow <= lastRow else { continue }
 
             for row in firstRow...lastRow {
-                let distance = headRow - row
-                let fade = max(0.06, 1 - CGFloat(distance) / CGFloat(column.length))
-                let isHead = distance == 0
+                guard column.brightness.indices.contains(row) else { continue }
+                let fade = column.brightness[row]
+                guard fade > 0.015 else { continue }
+                let isHead = row == headRow
                 let color = isHead ? MatrixPalette.bright : MatrixPalette.green.withAlphaComponent(fade * 0.88)
                 let glyphIndex = (row + Int(column.phase * 10)) % max(1, column.glyphs.count)
                 let string = column.glyphs[glyphIndex]
