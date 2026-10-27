@@ -120,7 +120,9 @@ final class MatrixScreenSaverView: ScreenSaverView {
                     .foregroundColor: color,
                     .shadow: isHead ? NSShadow(matrixGlow: MatrixPalette.green) : NSShadow()
                 ]
-                string.draw(at: NSPoint(x: x, y: CGFloat(row) * cellHeight), withAttributes: attributes)
+                let glyphWidth = string.size(withAttributes: attributes).width
+                let centeredX = x + (cellWidth - glyphWidth) / 2
+                string.draw(at: NSPoint(x: centeredX, y: CGFloat(row) * cellHeight), withAttributes: attributes)
             }
         }
     }
